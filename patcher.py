@@ -353,6 +353,13 @@ class FirmwarePatcher():
         self.data[ofs:ofs+4] = post
         return [(ofs, pre, post)]
 
+    def alt_throttle_alg(self):
+        sig = [0xF0, 0xB5, 0x25, 0x4A, 0x00, 0x24]
+        ofs = FindPattern(self.data, sig) + 4
+        pre, post = self.data[ofs:ofs + 1], bytearray((0x01, 0x24))
+        self.data[ofs:ofs + 2] = post
+        return [(ofs, pre, post)]
+
     def russian_throttle(self):
         ret = [dict()]
         # Find address of eco mode, part 1 find base addr
@@ -430,13 +437,13 @@ class FirmwarePatcher():
                 STRH   R4, [R1]
                 BMI    loc_3
                 LDR    R2, ={hex(eco_addr)}
-                CMP    R0, #0x7D
+                CMP    R0, #0x6E
                 LDRB   R2, [R2]
                 IT     GE
-                MOVGE  R0, #0x7D
+                MOVGE  R0, #0x6E
                 CMP    R2, R4
                 BEQ    loc_2
-                MOVS   R3, #0x96
+                MOVS   R3, #0xAF
                 MUL    R3, R3, R0
                 LDR    R2, ={hex(addr5)}
                 STR    R3, [R2]
@@ -520,19 +527,20 @@ if __name__ == "__main__":
     cfw = FirmwarePatcher(data)
 
     cfw.kers_min_speed(45)
-    cfw.speed_params(31, 50000, 30000, 26, 40000, 20000)
+    cfw.speed_params(34, 50000, 30000, 26, 40000, 20000)
     cfw.brake_params(115, 8000, 50000)
-    cfw.voltage_limit(52)
-    cfw.motor_start_speed(3)
+    #cfw.voltage_limit(52)
+    cfw.motor_start_speed(0)
     cfw.instant_eco_switch()
     #cfw.boot_with_eco()
     #cfw.cruise_control_delay(5)
-    #cfw.cruise_control_nobeep()
+    cfw.cruise_control_nobeep()
     cfw.remove_hard_speed_limit()
     #cfw.remove_charging_mode()
     #cfw.stay_on_locked()
     #cfw.bms_uart_76800()
     #cfw.russian_throttle()
+    cfw.alt_throttle_alg()
     #cfw.wheel_speed_const(315)
 
     # Don't flash encrypted firmware to scooter running firmware < 1.4.1

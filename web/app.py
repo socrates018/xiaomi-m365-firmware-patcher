@@ -109,7 +109,7 @@ def patch_firmware():
 
     russian_throttle = flask.request.args.get('russian_throttle', None)
     if russian_throttle:
-        patcher.russian_throttle()
+        patcher.alt_throttle_alg()
 
     remove_hard_speed_limit = flask.request.args.get('remove_hard_speed_limit', None)
     if remove_hard_speed_limit:
